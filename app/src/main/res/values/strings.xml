@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">SheetsAutomator</string>
+    <string name="sign_in_with_google">Sign in with Google</string>
+    <string name="importo">Importo</string>
+    <string name="data">Data</string>
+    <string name="descrizione">Descrizione</string>
+    <string name="login">Accedi</string>
+    <string name="categoria">Categoria</string>
+    <string name="aggiungi">Aggiungi</string>
+    <string name="accedi_info">Accedi per autorizzare la lettura e la modifica dei fogli Google Sheet</string>
 </resources>
