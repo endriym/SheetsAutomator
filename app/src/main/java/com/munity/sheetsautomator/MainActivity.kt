@@ -1,5 +1,6 @@
 package com.munity.sheetsautomator
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,8 +10,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.lifecycleScope
 import com.munity.sheetsautomator.ui.theme.SheetsAutomatorTheme
+import com.munity.sheetsautomator.util.OAuthUtil
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -20,24 +23,34 @@ class MainActivity : ComponentActivity() {
             SheetsAutomatorTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     SheetsAutomatorApp(
+                        context = this,
                         modifier = Modifier.padding(innerPadding),
                     )
                 }
             }
         }
     }
-}
 
+    override fun onResume() {
+        super.onResume()
 
-@Composable
-fun SheetsAutomatorApp(modifier: Modifier = Modifier) {
-}
-
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    SheetsAutomatorTheme {
-        SheetsAutomatorApp()
+        /**
+         * Intercept the authentication code (if there is any).
+         * This code will be valid for a short period (around 10 minutes),
+         * and you can exchange it for access and refresh tokens.
+         */
+        intent.data.let {
+            lifecycleScope.launch {
+                val authCode = OAuthUtil.extractAuthCode(applicationContext, it.toString())
+                authCode?.let {
+                    OAuthUtil.getAccessRefreshTokens(applicationContext, it)
+                }
+            }
+        }
     }
+}
+
+@Composable
+fun SheetsAutomatorApp(context: Context, modifier: Modifier = Modifier) {
+    SheetsNavHost("home", context, modifier)
 }
