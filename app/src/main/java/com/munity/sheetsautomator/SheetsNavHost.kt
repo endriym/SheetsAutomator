@@ -1,7 +1,6 @@
 package com.munity.sheetsautomator
 
 import android.content.Context
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -22,7 +21,7 @@ fun SheetsNavHost(
         startDestination = startDestination,
         modifier = modifier
     ) {
-        homeScreen(context, onShowSnackbar, modifier.fillMaxSize())
-        settingsScreen(context, onShowSnackbar, modifier.fillMaxSize())
+        homeScreen(context, onShowSnackbar)
+        settingsScreen(onShowSnackbar)
     }
 }

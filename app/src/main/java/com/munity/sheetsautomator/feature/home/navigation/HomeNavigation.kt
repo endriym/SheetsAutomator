@@ -20,7 +20,7 @@ fun NavController.navigateToHome(navOptions: NavOptions? = null) =
 fun NavGraphBuilder.homeScreen(
     context: Context,
     onShowSnackbar: suspend (String) -> Boolean,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     composable(route = "home") { navBackStackEntry ->
         val homeViewModel: HomeViewModel = viewModel(

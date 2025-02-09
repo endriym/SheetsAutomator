@@ -1,6 +1,5 @@
 package com.munity.sheetsautomator.feature.settings.navigation
 
-import android.content.Context
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -16,9 +15,8 @@ fun NavController.navigateToSettings(navOptions: NavOptions? = null) =
     navigate("settings", navOptions)
 
 fun NavGraphBuilder.settingsScreen(
-    context: Context,
     onShowSnackbar: suspend (String) -> Boolean,
-    modifier: Modifier
+    modifier: Modifier = Modifier
 ) {
     composable(route = "settings") { navBackStackEntry ->
         val settingsViewModel: SettingsViewModel = viewModel(
