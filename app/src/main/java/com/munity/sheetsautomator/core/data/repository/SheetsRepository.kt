@@ -17,7 +17,7 @@ class SheetsRepository(
         private const val TAG = "SheetsRepository"
         private const val SCOPE = "https://www.googleapis.com/auth/spreadsheets"
         private const val DEFAULT_CATEGORIES_RANGE = "F2:F"
-        private const val DEFAULT_APPEND_ROW_RANGE = "A:D"
+        private const val DEFAULT_APPEND_ROW_RANGE = "A1:D2"
     }
 
     val isLoggedIn: Flow<Boolean> = sheetsPrefsDS.storedPreferences.map { storedPreferences ->
