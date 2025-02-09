@@ -7,20 +7,29 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.munity.sheetsautomator.core.data.model.StoredPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 class SheetsPreferencesDataSource(
-    private val dataStore: DataStore<Preferences>
+    private val dataStore: DataStore<Preferences>,
 ) {
     private companion object {
-        val ACCESS_TOKEN = stringPreferencesKey("access_token")
-        val PERMITTED_SCOPES = stringPreferencesKey("permitted_scopes")
+        /// The authorization code is needed for refresh and access tokens
+        val AUTH_CODE_KEY = stringPreferencesKey("auth_code")
+        val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
+        val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
+        val EXPIRES_IN_KEY = stringPreferencesKey("expires_in")
+        val CATEGORIES_KEY = stringPreferencesKey("categories")
+        val SPREADSHEET_ID_KEY = stringPreferencesKey("spreadsheet_id")
+        val SHEET_TITLE_KEY = stringPreferencesKey("sheet_title")
+        val SHEET_TITLES_KEY = stringPreferencesKey("sheet_titles")
+        val CATEGORIES_RANGE_KEY = stringPreferencesKey("categories_range")
         const val TAG = "SheetsPreferencesDataSource"
     }
 
-    val accessToken: Flow<String> = dataStore.data
+    val storedPreferences: Flow<StoredPreferences> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
                 Log.e(TAG, "Error reading preferences.", exception)
@@ -30,12 +39,65 @@ class SheetsPreferencesDataSource(
             }
         }
         .map { preferences ->
-            preferences[ACCESS_TOKEN] ?: ""
+            StoredPreferences(
+                authToken = preferences[AUTH_CODE_KEY],
+                accessToken = preferences[ACCESS_TOKEN_KEY],
+                expiresIn = preferences[EXPIRES_IN_KEY],
+                refreshToken = preferences[REFRESH_TOKEN_KEY],
+                spreadsheetId = preferences[SPREADSHEET_ID_KEY],
+                sheetTitle = preferences[SHEET_TITLE_KEY],
+                sheetTitles = preferences[SHEET_TITLES_KEY]?.split(", "),
+                categories = preferences[CATEGORIES_KEY]?.split(", "),
+                categoriesRange = preferences[CATEGORIES_RANGE_KEY],
+            )
         }
 
-    suspend fun saveAccessToken(accessToken: String) {
+    suspend fun saveAuthCode(authCode: String) {
         dataStore.edit { preferences ->
-            preferences[ACCESS_TOKEN] = accessToken
+            preferences[AUTH_CODE_KEY] = authCode
+        }
+    }
+
+    suspend fun saveAccessToken(accessToken: String, dateExp: String) {
+        dataStore.edit { preferences ->
+            preferences[ACCESS_TOKEN_KEY] = accessToken
+            preferences[EXPIRES_IN_KEY] = dateExp
+        }
+    }
+
+    suspend fun saveRefreshToken(refreshToken: String) {
+        dataStore.edit { preferences ->
+            preferences[REFRESH_TOKEN_KEY] = refreshToken
+        }
+    }
+
+    suspend fun saveCategories(categories: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[CATEGORIES_KEY] = categories.joinToString()
+        }
+    }
+
+    suspend fun saveSpreadsheetId(spreadsheetId: String) {
+        dataStore.edit { preferences ->
+            preferences[SPREADSHEET_ID_KEY] = spreadsheetId
+        }
+    }
+
+    suspend fun saveSheetTitle(sheetTitle: String) {
+        dataStore.edit { preferences ->
+            preferences[SHEET_TITLE_KEY] = sheetTitle
+        }
+    }
+
+    suspend fun saveSheetTitles(sheetTitles: List<String>) {
+        dataStore.edit { preferences ->
+            preferences[SHEET_TITLES_KEY] = sheetTitles.joinToString()
+        }
+    }
+
+    suspend fun saveCategoriesRange(categoriesRange: String) {
+        dataStore.edit { preferences ->
+            preferences[CATEGORIES_RANGE_KEY] = categoriesRange
         }
     }
 }
