@@ -16,4 +16,16 @@ object DateUtil {
         val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         return formatter.format(Date(millis))
     }
+
+    fun getDateIn(seconds: Int): String {
+        val date = Date.from(Instant.now().plusSeconds(seconds.toLong()))
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        return dateFormat.format(date)
+    }
+
+    fun hasExpired(dateStr: String): Boolean {
+        val dateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault())
+        val dateFromStr = dateFormat.parse(dateStr)
+        return Date.from(Instant.now()) > dateFromStr
+    }
 }
