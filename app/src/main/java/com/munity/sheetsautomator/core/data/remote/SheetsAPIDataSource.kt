@@ -34,7 +34,7 @@ class SheetsAPIDataSource {
         private const val GOOGLE_SHEETS_VALUES_ENDPOINT =
             "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s?access_token=%s"
         private const val GOOGLE_SHEETS_APPEND_ENDPOINT =
-            "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS"
+            "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s:append?valueInputOption=USER_ENTERED&insertDataOption=OVERWRITE"
         private const val PACKAGE_NAME = "com.munity.sheetsautomator"
         private const val TAG = "SheetsDataSource"
     }
