@@ -68,6 +68,7 @@ fun ExposedDropdownMenu(
             singleLine = true,
             modifier = Modifier.fillMaxWidth()
         )
+
         DropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },

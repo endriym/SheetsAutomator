@@ -2,9 +2,8 @@ package com.munity.sheetsautomator.core.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
@@ -23,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
@@ -35,11 +33,15 @@ import com.munity.sheetsautomator.util.DateUtil.convertMillisToDate
 fun DatePickerDocked(onDateChange: (String) -> Unit, modifier: Modifier = Modifier) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        convertMillisToDate(it)
+    val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
+        // Treating this as a trigger event when a date is selected in the picker
+        val date = convertMillisToDate(millis)
+        onDateChange(date)
+        showDatePicker = false
+        date
     } ?: ""
 
-    Box(
+    Column(
         modifier = modifier
     ) {
         OutlinedTextField(
@@ -47,7 +49,6 @@ fun DatePickerDocked(onDateChange: (String) -> Unit, modifier: Modifier = Modifi
             onValueChange = onDateChange,
             label = { Text(stringResource(R.string.data)) },
             placeholder = { Text(text = "dd/mm/yyyy") },
-            readOnly = true,
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = !showDatePicker }) {
                     Icon(
@@ -58,26 +59,25 @@ fun DatePickerDocked(onDateChange: (String) -> Unit, modifier: Modifier = Modifi
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(64.dp)
         )
 
         if (showDatePicker) {
-            Popup(
-                onDismissRequest = { showDatePicker = false },
-                alignment = Alignment.TopStart
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .offset(y = 64.dp)
-                        .shadow(elevation = 4.dp)
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(16.dp)
+            Box {
+                Popup(
+                    onDismissRequest = { showDatePicker = false },
+                    alignment = Alignment.TopStart
                 ) {
-                    DatePicker(
-                        state = datePickerState,
-                        showModeToggle = false
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.surface)
+                            .padding(vertical = 8.dp, horizontal = 16.dp)
+                    ) {
+                        DatePicker(
+                            state = datePickerState,
+                            showModeToggle = false
+                        )
+                    }
                 }
             }
         }
