@@ -7,13 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -26,7 +24,7 @@ import com.munity.sheetsautomator.core.ui.components.ExposedDropdownMenu
 
 @Composable
 fun HomeScreen(
-    loggedIn: Boolean,
+    isLoggedIn: Boolean,
     amount: String,
     onAmountChange: (String) -> Unit,
     onDateChange: (String) -> Unit,
@@ -37,9 +35,23 @@ fun HomeScreen(
     onDescriptionChange: (String) -> Unit,
     onAddButtonClick: () -> Unit,
     onSignInButtonClick: () -> Unit,
+    isSnackBarShowing: Boolean,
+    snackBarMessage: String,
+    onShowSnackbar: suspend (String) -> Boolean,
+    onDismissSnackBar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (loggedIn) {
+    LaunchedEffect(isSnackBarShowing) {
+        if (isSnackBarShowing) {
+            val snackBarResult = onShowSnackbar(snackBarMessage)
+            // On SnackBar dismissed (either by timeout or by user).
+            if (snackBarResult) {
+                onDismissSnackBar()
+            }
+        }
+    }
+
+    if (isLoggedIn) {
         HomeScreenLoggedIn(
             amount = amount,
             onAmountChange = onAmountChange,
@@ -115,7 +127,10 @@ fun HomeScreenLoggedIn(
                 .padding(16.dp)
         )
 
-        Button(onClick = onAddButtonClick, modifier = Modifier.padding(top = 24.dp)) {
+        Button(
+            onClick = onAddButtonClick,
+            modifier = Modifier.padding(top = 24.dp)
+        ) {
             Text(stringResource(R.string.aggiungi))
         }
     }
@@ -133,13 +148,12 @@ fun HomeScreenNotLoggedIn(onSignInButtonClick: () -> Unit, modifier: Modifier = 
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
         )
+
         Button(
-            onClick = onSignInButtonClick
+            onClick = onSignInButtonClick,
+            colors = ButtonDefaults.buttonColors(),
         ) {
             Text(text = stringResource(R.string.login))
         }
-
-        var value by remember { mutableStateOf("") }
-        TextField(value = value, onValueChange = { value = it })
     }
 }

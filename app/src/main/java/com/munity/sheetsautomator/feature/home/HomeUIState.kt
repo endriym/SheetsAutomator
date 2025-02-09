@@ -7,4 +7,6 @@ data class HomeUIState(
     val date: String = DateUtil.getCurrentDayMonth(),
     val category: String = "",
     val description: String = "",
+    val isSnackBarShowing: Boolean = false,
+    val snackBarMessage: String = "",
 )
