@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator
+package com.munity.sheetsautomator.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator.ui.theme
+package com.munity.sheetsautomator.core.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

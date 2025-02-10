@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator.core.ui
+package com.munity.sheetsautomator.ui
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -12,12 +12,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
-import com.munity.sheetsautomator.SheetsNavHost
+import com.munity.sheetsautomator.navigation.SheetsNavHost
 import com.munity.sheetsautomator.core.ui.components.SheetsBottomAppBar
 import com.munity.sheetsautomator.core.ui.components.SheetsTopAppBar
 import com.munity.sheetsautomator.feature.home.navigation.navigateToHome
 import com.munity.sheetsautomator.feature.settings.navigation.navigateToSettings
-import com.munity.sheetsautomator.ui.theme.SheetsAutomatorTheme
+import com.munity.sheetsautomator.core.ui.theme.SheetsAutomatorTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

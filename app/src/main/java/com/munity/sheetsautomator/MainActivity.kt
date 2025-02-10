@@ -5,7 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.lifecycleScope
-import com.munity.sheetsautomator.core.ui.SheetsAutomatorApp
+import com.munity.sheetsautomator.ui.SheetsAutomatorApp
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {

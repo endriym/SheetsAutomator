@@ -37,6 +37,8 @@ fun SettingsScreen(
     onSheetTitlesSync: () -> Unit,
     categories: List<String>,
     onCategoriesSync: () -> Unit,
+    categoriesRange: String,
+    onCategoriesRangeChange: (String) -> Unit,
     isSnackBarShowing: Boolean,
     snackBarMessage: String,
     onShowSnackbar: suspend (String) -> Boolean,
@@ -135,5 +137,11 @@ fun SettingsScreen(
                 )
             }
         }
+
+        TextField(
+            value = categoriesRange,
+            onValueChange = onCategoriesRangeChange,
+            modifier = Modifier.padding(16.dp)
+        )
     }
 }

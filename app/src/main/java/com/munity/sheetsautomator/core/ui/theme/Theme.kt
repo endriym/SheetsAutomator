@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator.ui.theme
+package com.munity.sheetsautomator.core.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
