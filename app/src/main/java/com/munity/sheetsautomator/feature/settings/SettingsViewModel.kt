@@ -58,9 +58,15 @@ class SettingsViewModel(
         initialValue = emptyList()
     )
 
+    val categoriesRange: StateFlow<String> = sheetsRepository.categoriesRange.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = ""
+    )
+
     fun refreshSheetTitles() {
         viewModelScope.launch {
-            val result = sheetsRepository.refreshSheetTitles(true)
+            val result = sheetsRepository.refreshSheetTitles()
 
             val message: String = if (result.isSuccess)
                 "Sheet titles successfully refreshed."
@@ -96,35 +102,66 @@ class SettingsViewModel(
 
     fun onSpreadsheetIdTrailingIconClick() {
         _uiState.update { newUiState ->
-            newUiState.copy(isDialogTextFieldVisible = true)
+            newUiState.copy(isSpreadsheetIdDialogVisible = true)
         }
     }
 
-    fun onDialogSpreadsheetIdValueChange(newDialogSpreadsheetId: String) {
+    fun onSpreadsheetIdDialogValueChange(newSpreadsheetIdDialog: String) {
         _uiState.update { newUiState ->
-            newUiState.copy(dialogSpreadsheetId = newDialogSpreadsheetId)
+            newUiState.copy(spreadsheetIdDialog = newSpreadsheetIdDialog)
         }
     }
 
-    fun onDialogConfirmButton() {
+    fun onSpreadsheetIdDialogConfirmButton() {
         viewModelScope.launch(Dispatchers.IO) {
-            sheetsRepository.saveSpreadsheetId(_uiState.value.dialogSpreadsheetId)
+            sheetsRepository.saveSpreadsheetId(_uiState.value.spreadsheetIdDialog)
         }
 
         _uiState.update { newUiState ->
             newUiState.copy(
-                isDialogTextFieldVisible = false
+                isSpreadsheetIdDialogVisible = false
             )
         }
     }
 
-    fun onDialogDismissButton() {
+    fun onSpreadsheetIdDialogDismissButton() {
         _uiState.update { newUiState ->
-            newUiState.copy(isDialogTextFieldVisible = false, dialogSpreadsheetId = "")
+            newUiState.copy(isSpreadsheetIdDialogVisible = false, spreadsheetIdDialog = "")
+        }
+    }
+
+    fun onCategoriesRangeTrailingIconClick() {
+        _uiState.update { newUiState ->
+            newUiState.copy(isCategoriesRangeDialogTFVisible = true)
+        }
+    }
+
+    fun onCategoriesRangeDialogValueChange(newCategoriesRangeDialog: String) {
+        _uiState.update { newUiState ->
+            newUiState.copy(categoriesRangeDialog = newCategoriesRangeDialog)
+        }
+    }
+
+    fun onCategoriesRangeDialogConfirmButton() {
+        viewModelScope.launch(Dispatchers.IO) {
+            sheetsRepository.saveCategoriesRange(_uiState.value.categoriesRangeDialog)
+        }
+
+        _uiState.update { newUiState ->
+            newUiState.copy(
+                isCategoriesRangeDialogTFVisible = false
+            )
+        }
+    }
+
+    fun onCategoriesRangeDialogDismissButton() {
+        _uiState.update { newUiState ->
+            newUiState.copy(isCategoriesRangeDialogTFVisible = false, categoriesRangeDialog = "")
         }
     }
 
     fun onDropDownSheetTitleClick(newSheetTitle: String) {
+
         viewModelScope.launch(Dispatchers.IO) { sheetsRepository.saveSheetTitle(newSheetTitle) }
     }
 

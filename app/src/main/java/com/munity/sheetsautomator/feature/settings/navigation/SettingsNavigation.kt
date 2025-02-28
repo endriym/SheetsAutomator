@@ -28,19 +28,18 @@ fun NavGraphBuilder.settingsScreen(
         val sheetTitle: String by settingsViewModel.sheetTitle.collectAsState()
         val categories: List<String> by settingsViewModel.categories.collectAsState()
         val sheetTitles: List<String> by settingsViewModel.sheetTitles.collectAsState()
+        val categoriesRange: String by settingsViewModel.categoriesRange.collectAsState()
 
         SettingsScreen(
-            spreadsheetIdValue = spreadsheetId,
-            onSpreadsheetIdTrailingIconClick = { settingsViewModel.onSpreadsheetIdTrailingIconClick() },
-            isDialogTextFieldVisible = uiState.isDialogTextFieldVisible,
-            dialogSpreadsheetIdValue = uiState.dialogSpreadsheetId,
-            onDialogSpreadsheetIdValueChange = {
-                settingsViewModel.onDialogSpreadsheetIdValueChange(it)
-            },
-            onDialogDismissButtonClick = { settingsViewModel.onDialogDismissButton() },
-            onDialogConfirmButtonClick = { settingsViewModel.onDialogConfirmButton() },
-            sheetTitleValue = sheetTitle,
-            onDropDownSheetTitleClick = { settingsViewModel.onDropDownSheetTitleClick(it) },
+            spreadsheetIdTFValue = spreadsheetId,
+            onSpreadsheetIdTFTrailingIconClick = settingsViewModel::onSpreadsheetIdTrailingIconClick,
+            isSpreadsheetIdDialogTFVisible = uiState.isSpreadsheetIdDialogVisible,
+            spreadsheetIdDialogTFValue = uiState.spreadsheetIdDialog,
+            onDialogSpreadsheetIdValueChange = settingsViewModel::onSpreadsheetIdDialogValueChange,
+            onSpreadsheetIdDialogDismissButtonClick = settingsViewModel::onSpreadsheetIdDialogDismissButton,
+            onSpreadsheetIdDialogConfirmButtonClick = settingsViewModel::onSpreadsheetIdDialogConfirmButton,
+            sheetTitleTFValue = sheetTitle,
+            onDropDownSheetTitleClick = settingsViewModel::onDropDownSheetTitleClick,
             sheetTitles = sheetTitles,
             onSheetTitlesSync = settingsViewModel::refreshSheetTitles,
             onCategoriesSync = settingsViewModel::refreshCategories,
@@ -49,7 +48,14 @@ fun NavGraphBuilder.settingsScreen(
             snackBarMessage = uiState.snackBarMessage,
             onShowSnackbar = onShowSnackbar,
             onDismissSnackBar = settingsViewModel::onDismissSnackBar,
-            modifier = modifier
+            modifier = modifier,
+            categoriesRangeValue = categoriesRange,
+            onCategoriesRangeTrailingIconClick = settingsViewModel::onCategoriesRangeTrailingIconClick,
+            isCategoriesRangeDialogTFVisible = uiState.isCategoriesRangeDialogTFVisible,
+            categoriesRangeDialogTFValue = uiState.categoriesRangeDialog,
+            onCategoriesRangeDialogValueChange = settingsViewModel::onCategoriesRangeDialogValueChange,
+            onCategoriesRangeDialogDismissButtonClick = settingsViewModel::onCategoriesRangeDialogDismissButton,
+            onCategoriesRangeDialogConfirmButtonClick = settingsViewModel::onCategoriesRangeDialogConfirmButton,
         )
     }
 }

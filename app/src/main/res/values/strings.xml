@@ -12,7 +12,10 @@
     <string name="sheet_title">Sheet title</string>
     <string name="dismiss">Dismiss</string>
     <string name="confirm">Confirm</string>
-    <string name="dialog_description">The unique identifier for a spreadsheet. It\'s a particular string containing letters, numbers, and some special characters that reference a spreadsheet and it can be derived from the spreadsheet\'s URL. Spreadsheet IDs are stable, even if the spreadsheet name changes.\n\nhttps://docs.google.com/spreadsheets/d/SPREADSHEET_ID/</string>
+    <string name="spreadsheet_id_dialog_description">The unique identifier for a spreadsheet. It\'s a particular string containing letters, numbers, and some special characters that reference a spreadsheet and it can be derived from the spreadsheet\'s URL. Spreadsheet IDs are stable, even if the spreadsheet name changes.\n\nhttps://docs.google.com/spreadsheets/d/SPREADSHEET_ID/</string>
     <string name="dialog_title">Modify spreadsheet ID</string>
     <string name="categories">Categories</string>
+    <string name="categories_range">Categories range</string>
+    <string name="modify_categories_range">Modify categories range</string>
+    <string name="categories_range_dialog_description">Categories range should follow the notation: \'LX:LX\' where \'L\' refers to the column, while \'X\' and \'Y\' to the first row and second row enclosing the category values. Examples:\n- \'A2:A5\' refers to all the cells from the second to the fifth row in the A column;\n- \'A2:A\' refers to all the cells from the second row onward in the A column;\n- \'A:A\' refers to all the cells in the A column (it stops at the last value).</string>
 </resources>
