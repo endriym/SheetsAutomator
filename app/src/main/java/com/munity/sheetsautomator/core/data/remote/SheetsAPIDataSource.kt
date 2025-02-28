@@ -22,6 +22,7 @@ import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import java.net.URLEncoder
 
 class SheetsAPIDataSource {
     companion object {
@@ -54,7 +55,7 @@ class SheetsAPIDataSource {
         val response = httpClient.get(
             urlString = GOOGLE_SHEETS_VALUES_ENDPOINT.format(
                 spreadsheetID,
-                "$sheetTitle!$range",
+                URLEncoder.encode("'$sheetTitle'!$range", Charsets.UTF_8.name()),
                 accessToken
             )
         )
