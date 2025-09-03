@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator.core.data.model
+package com.munity.sheetsautomator.core.data.local.datastore.model
 
 data class StoredPreferences(
     val authToken: String?,

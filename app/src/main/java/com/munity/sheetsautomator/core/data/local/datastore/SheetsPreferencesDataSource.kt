@@ -7,14 +7,14 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.munity.sheetsautomator.core.data.model.StoredPreferences
+import com.munity.sheetsautomator.core.data.local.datastore.model.StoredPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 
 class SheetsPreferencesDataSource(
     private val dataStore: DataStore<Preferences>,
-) {
+) : PreferencesStorage {
     private companion object {
         /// The authorization code is needed for refresh and access tokens
         val AUTH_CODE_KEY = stringPreferencesKey("auth_code")
@@ -29,7 +29,7 @@ class SheetsPreferencesDataSource(
         const val TAG = "SheetsPreferencesDataSource"
     }
 
-    val storedPreferences: Flow<StoredPreferences> = dataStore.data
+    override val storedPreferences: Flow<StoredPreferences> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
                 Log.e(TAG, "Error reading preferences.", exception)
@@ -52,50 +52,50 @@ class SheetsPreferencesDataSource(
             )
         }
 
-    suspend fun saveAuthCode(authCode: String) {
+    override suspend fun saveAuthCode(authCode: String) {
         dataStore.edit { preferences ->
             preferences[AUTH_CODE_KEY] = authCode
         }
     }
 
-    suspend fun saveAccessToken(accessToken: String, dateExp: String) {
+    override suspend fun saveAccessToken(accessToken: String, dateExp: String) {
         dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN_KEY] = accessToken
             preferences[EXPIRES_IN_KEY] = dateExp
         }
     }
 
-    suspend fun saveRefreshToken(refreshToken: String) {
+    override suspend fun saveRefreshToken(refreshToken: String) {
         dataStore.edit { preferences ->
             preferences[REFRESH_TOKEN_KEY] = refreshToken
         }
     }
 
-    suspend fun saveCategories(categories: List<String>) {
+    override suspend fun saveCategories(categories: List<String>) {
         dataStore.edit { preferences ->
             preferences[CATEGORIES_KEY] = categories.joinToString()
         }
     }
 
-    suspend fun saveSpreadsheetId(spreadsheetId: String) {
+    override suspend fun saveSpreadsheetId(spreadsheetId: String) {
         dataStore.edit { preferences ->
             preferences[SPREADSHEET_ID_KEY] = spreadsheetId
         }
     }
 
-    suspend fun saveSheetTitle(sheetTitle: String) {
+    override suspend fun saveSheetTitle(sheetTitle: String) {
         dataStore.edit { preferences ->
             preferences[SHEET_TITLE_KEY] = sheetTitle
         }
     }
 
-    suspend fun saveSheetTitles(sheetTitles: List<String>) {
+    override suspend fun saveSheetTitles(sheetTitles: List<String>) {
         dataStore.edit { preferences ->
             preferences[SHEET_TITLES_KEY] = sheetTitles.joinToString()
         }
     }
 
-    suspend fun saveCategoriesRange(categoriesRange: String) {
+    override suspend fun saveCategoriesRange(categoriesRange: String) {
         dataStore.edit { preferences ->
             preferences[CATEGORIES_RANGE_KEY] = categoriesRange
         }
