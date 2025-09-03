@@ -11,6 +11,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.google.devtools.ksp)
 }
 
 android {
@@ -76,6 +77,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.datastore)
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)
