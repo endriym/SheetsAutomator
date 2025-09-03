@@ -1,18 +1,18 @@
 [versions]
-agp = "8.8.2"
-kotlin = "2.1.10"
-coreKtx = "1.15.0"
+agp = "8.13.0"
+kotlin = "2.2.10"
+coreKtx = "1.17.0"
 junit = "4.13.2"
-junitVersion = "1.2.1"
-espressoCore = "3.6.1"
-lifecycleRuntimeKtx = "2.8.7"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+lifecycleRuntimeKtx = "2.9.3"
 activityCompose = "1.10.1"
-composeBom = "2025.02.00"
-lifecycleViewmodelCompose = "2.8.7"
-dataStore = "1.1.3"
-navigationCompose = "2.8.8"
-ktorCore = "3.0.3"
-kotlinSerialization = "1.8.0"
+composeBom = "2025.08.01"
+lifecycleViewmodelCompose = "2.9.3"
+dataStore = "1.1.7"
+navigationCompose = "2.9.3"
+ktorCore = "3.2.3"
+kotlinSerialization = "1.9.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -35,6 +35,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 ktor-client-core = { group = "io.ktor", name = "ktor-client-core", version.ref = "ktorCore" }
 ktor-client-cio = { group = "io.ktor", name = "ktor-client-cio", version.ref = "ktorCore" }
 ktor-client-content-negotiation = { group = "io.ktor", name = "ktor-client-content-negotiation", version.ref = "ktorCore" }
+ktor-client-auth = { group = "io.ktor", name = "ktor-client-auth", version.ref = "ktorCore" }
 ktor-serialization-kotlinx-json = { group = "io.ktor", name = "ktor-serialization-kotlinx-json", version.ref = "ktorCore" }
 kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinSerialization" }
 
