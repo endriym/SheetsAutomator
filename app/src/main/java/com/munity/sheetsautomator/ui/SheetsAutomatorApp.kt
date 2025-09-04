@@ -22,6 +22,7 @@ import com.munity.sheetsautomator.core.ui.components.SheetsTopAppBar
 import com.munity.sheetsautomator.core.ui.theme.SheetsAutomatorTheme
 import com.munity.sheetsautomator.feature.home.navigation.HomeRoute
 import com.munity.sheetsautomator.feature.home.navigation.navigateToHome
+import com.munity.sheetsautomator.feature.queue.navigation.navigateToQueue
 import com.munity.sheetsautomator.feature.settings.navigation.navigateToSettings
 import com.munity.sheetsautomator.navigation.SheetsNavHost
 import com.munity.sheetsautomator.navigation.TopLevelDestination
@@ -63,7 +64,9 @@ fun SheetsAutomatorApp() {
                                 topLevelNavOptions
                             )
 
-                            TopLevelDestination.QUEUE.ordinal -> TODO()
+                            TopLevelDestination.QUEUE.ordinal -> navHostController.navigateToQueue(
+                                topLevelNavOptions
+                            )
 
                             TopLevelDestination.SETTINGS.ordinal -> navHostController.navigateToSettings(
                                 navOptions = topLevelNavOptions

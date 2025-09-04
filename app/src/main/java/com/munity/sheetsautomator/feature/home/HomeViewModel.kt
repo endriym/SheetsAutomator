@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 
 class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel() {
     companion object {
@@ -67,24 +68,26 @@ class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel(
         }
     }
 
-    suspend fun onAddButtonClick() {
-        val valueRange = ValueRange(
-            values = listOf(uiStateToStringList())
-        )
-        val result = sheetsRepository.appendRow(range = "A:D", valueRange = valueRange)
+    fun onAddButtonClick() {
+        viewModelScope.launch {
+            val valueRange = ValueRange(
+                values = listOf(uiStateToStringList())
+            )
+            val result = sheetsRepository.appendRow(range = "A:D", valueRange = valueRange)
 
-        _uiState.update { newUiState ->
-            if (result.isSuccess) {
-                newUiState.copy(
-                    isSnackBarShowing = true,
-                    snackBarMessage = "Row was added successfully."
-                )
-            } else {
-                newUiState.copy(
-                    isSnackBarShowing = true,
-                    snackBarMessage = result.exceptionOrNull()?.message
-                        ?: "Row was not added. Unknown problem!"
-                )
+            _uiState.update { newUiState ->
+                if (result.isSuccess) {
+                    newUiState.copy(
+                        isSnackBarShowing = true,
+                        snackBarMessage = "Row was added successfully."
+                    )
+                } else {
+                    newUiState.copy(
+                        isSnackBarShowing = true,
+                        snackBarMessage = result.exceptionOrNull()?.message
+                            ?: "Row was not added. Unknown problem!"
+                    )
+                }
             }
         }
     }
@@ -94,7 +97,6 @@ class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel(
             newUiState.copy(isSnackBarShowing = false, snackBarMessage = "")
         }
     }
-
 
     fun onSignInButtonClick(context: Context) {
         OAuthUtil.launchAuthentication(context)
