@@ -1,6 +1,16 @@
 <resources>
     <string name="app_name">SheetsAutomator</string>
     <string name="sign_in_with_google">Sign in with Google</string>
+
+    <!-- NavigationBar  -->
+    <string name="home_icon_text">Home</string>
+    <string name="home_title_text">Home</string>
+    <string name="queue_icon_text">Queue</string>
+    <string name="queue_title_text">Queue</string>
+    <string name="settings_icon_text">Settings</string>
+    <string name="settings_title_text">Settings</string>
+    <!-- **************** -->
+
     <string name="importo">Importo</string>
     <string name="data">Data</string>
     <string name="descrizione">Descrizione</string>

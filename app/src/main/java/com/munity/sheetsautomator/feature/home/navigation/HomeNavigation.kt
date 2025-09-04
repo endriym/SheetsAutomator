@@ -13,16 +13,20 @@ import androidx.navigation.compose.composable
 import com.munity.sheetsautomator.feature.home.HomeScreen
 import com.munity.sheetsautomator.feature.home.HomeViewModel
 import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object HomeRoute
 
 fun NavController.navigateToHome(navOptions: NavOptions? = null) =
-    navigate("home", navOptions)
+    navigate(HomeRoute, navOptions)
 
 fun NavGraphBuilder.homeScreen(
     context: Context,
     onShowSnackbar: suspend (String) -> Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    composable(route = "home") { navBackStackEntry ->
+    composable<HomeRoute> { navBackStackEntry ->
         val homeViewModel: HomeViewModel = viewModel(
             factory = HomeViewModel.Factory
         )

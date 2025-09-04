@@ -10,7 +10,7 @@ import com.munity.sheetsautomator.feature.settings.navigation.settingsScreen
 
 @Composable
 fun SheetsNavHost(
-    startDestination: String,
+    startDestination: Any,
     navHostController: NavHostController,
     onShowSnackbar: suspend (String) -> Boolean,
     context: Context,

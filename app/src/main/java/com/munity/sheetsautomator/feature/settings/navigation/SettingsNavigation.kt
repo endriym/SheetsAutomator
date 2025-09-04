@@ -10,15 +10,19 @@ import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
 import com.munity.sheetsautomator.feature.settings.SettingsScreen
 import com.munity.sheetsautomator.feature.settings.SettingsViewModel
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object SettingsRoute
 
 fun NavController.navigateToSettings(navOptions: NavOptions? = null) =
-    navigate("settings", navOptions)
+    navigate(SettingsRoute, navOptions)
 
 fun NavGraphBuilder.settingsScreen(
     onShowSnackbar: suspend (String) -> Boolean,
     modifier: Modifier = Modifier
 ) {
-    composable(route = "settings") { navBackStackEntry ->
+    composable<SettingsRoute> { navBackStackEntry ->
         val settingsViewModel: SettingsViewModel = viewModel(
             factory = SettingsViewModel.Factory
         )
