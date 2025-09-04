@@ -1,4 +1,4 @@
-package com.munity.sheetsautomator.core.data.model.gsheet
+package com.munity.sheetsautomator.core.data.remote.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.Serializable

@@ -2,10 +2,10 @@ package com.munity.sheetsautomator.core.data.remote
 
 import com.munity.sheetsautomator.BuildConfig
 import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
-import com.munity.sheetsautomator.core.data.model.gsheet.ErrorInfo
-import com.munity.sheetsautomator.core.data.model.gsheet.Spreadsheet
-import com.munity.sheetsautomator.core.data.model.gsheet.TokenInfo
-import com.munity.sheetsautomator.core.data.model.gsheet.ValueRange
+import com.munity.sheetsautomator.core.data.remote.model.ErrorInfo
+import com.munity.sheetsautomator.core.data.remote.model.Spreadsheet
+import com.munity.sheetsautomator.core.data.remote.model.TokenInfo
+import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.util.DateUtil
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body

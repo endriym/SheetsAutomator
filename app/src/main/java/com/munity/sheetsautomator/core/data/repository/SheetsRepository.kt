@@ -2,7 +2,7 @@ package com.munity.sheetsautomator.core.data.repository
 
 import com.munity.sheetsautomator.core.data.local.database.SheetsAutomatorDatabase
 import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
-import com.munity.sheetsautomator.core.data.model.gsheet.ValueRange
+import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.core.data.remote.SheetsApi
 import com.munity.sheetsautomator.util.DateUtil
 import kotlinx.coroutines.flow.Flow

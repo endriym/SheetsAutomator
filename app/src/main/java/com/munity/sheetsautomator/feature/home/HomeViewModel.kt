@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.munity.sheetsautomator.SheetsAutomatorApplication
-import com.munity.sheetsautomator.core.data.model.gsheet.ValueRange
+import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.core.data.repository.SheetsRepository
 import com.munity.sheetsautomator.util.OAuthUtil
 import kotlinx.coroutines.flow.MutableStateFlow
