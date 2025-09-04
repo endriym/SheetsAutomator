@@ -24,5 +24,5 @@ interface QueueDao {
     fun getQueueEntries(): Flow<List<QueueEntry>>
 
     @Query("SELECT * FROM queue_entry WHERE id = :entryId")
-    fun getQueueEntryById(entryId: Int)
+    fun getQueueEntryById(entryId: Int): Flow<QueueEntry>
 }
