@@ -1,17 +1,18 @@
 package com.munity.sheetsautomator.core.data.repository
 
-import com.munity.sheetsautomator.core.data.local.datastore.SheetsPreferencesDataSource
-import com.munity.sheetsautomator.core.data.model.StoredPreferences
+import com.munity.sheetsautomator.core.data.local.database.SheetsAutomatorDatabase
+import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
 import com.munity.sheetsautomator.core.data.model.gsheet.ValueRange
-import com.munity.sheetsautomator.core.data.remote.SheetsAPIDataSource
+import com.munity.sheetsautomator.core.data.remote.SheetsApi
 import com.munity.sheetsautomator.util.DateUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
 class SheetsRepository(
-    private val sheetsPrefsDS: SheetsPreferencesDataSource,
-    private val sheetsAPIDataSource: SheetsAPIDataSource,
+    private val prefsStorage: PreferencesStorage,
+    private val sheetsDatabase: SheetsAutomatorDatabase,
+    private val sheetsApi: SheetsApi,
 ) {
     companion object {
         private const val TAG = "SheetsRepository"
@@ -19,45 +20,45 @@ class SheetsRepository(
         private const val DEFAULT_APPEND_ROW_RANGE = "A1:D1"
     }
 
-    val isLoggedIn: Flow<Boolean> = sheetsPrefsDS.storedPreferences.map { storedPreferences ->
+    val isLoggedIn: Flow<Boolean> = prefsStorage.storedPreferences.map { storedPreferences ->
         storedPreferences.refreshToken?.isNotEmpty() ?: false
     }
 
-    val categories: Flow<List<String>> = sheetsPrefsDS.storedPreferences.map { storedPrefs ->
+    val categories: Flow<List<String>> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.categories ?: emptyList()
     }
 
-    val spreadsheetId: Flow<String> = sheetsPrefsDS.storedPreferences.map { storedPrefs ->
+    val spreadsheetId: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.spreadsheetId ?: ""
     }
 
-    val sheetTitle: Flow<String> = sheetsPrefsDS.storedPreferences.map { storedPrefs ->
+    val sheetTitle: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.sheetTitle ?: ""
     }
 
-    val sheetTitles: Flow<List<String>> = sheetsPrefsDS.storedPreferences.map { storedPrefs ->
+    val sheetTitles: Flow<List<String>> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.sheetTitles ?: emptyList()
     }
 
-    val categoriesRange: Flow<String> = sheetsPrefsDS.storedPreferences.map { storedPrefs ->
+    val categoriesRange: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.categoriesRange ?: ""
     }
 
     /**
-     * Exchange authorization code for refresh and access tokens.
+     * Exchange authorization code for the first refresh and access tokens.
      * It saves it, then, in the DataStore.
      */
-    private suspend fun updateAccessRefreshTokens(
-        authorizationCode: String,
-        isRefresh: Boolean
-    ): String {
-        val result = sheetsAPIDataSource.getAccessRefreshTokens(authorizationCode, isRefresh)
+    private suspend fun getFirstAccessRefreshTokens(authorizationCode: String): String {
+        val result = sheetsApi.getAccessRefreshTokens(authorizationCode, isRefresh = false)
 
         if (result.isSuccess) {
             val tokenInfo = result.getOrNull()!!
 
-            sheetsPrefsDS.apply {
-                saveAccessToken(tokenInfo.accessToken, DateUtil.getDateIn(tokenInfo.expiresIn))
+            prefsStorage.apply {
+                saveAccessToken(
+                    tokenInfo.accessToken,
+                    DateUtil.getIso8601FromNowIn(tokenInfo.expiresIn)
+                )
                 tokenInfo.refreshToken?.let { refreshToken ->
                     saveRefreshToken(refreshToken)
                 }
@@ -67,20 +68,6 @@ class SheetsRepository(
         }
 
         throw result.exceptionOrNull()!!
-    }
-
-    private suspend fun getAccessToken(storedPrefs: StoredPreferences): String = when {
-        storedPrefs.expiresIn != null && !DateUtil.hasExpired(storedPrefs.expiresIn) -> {
-            storedPrefs.accessToken!!
-        }
-
-        storedPrefs.expiresIn != null && DateUtil.hasExpired(storedPrefs.expiresIn) -> {
-            updateAccessRefreshTokens(storedPrefs.refreshToken!!, isRefresh = true)
-        }
-
-        else -> {
-            throw IllegalStateException("Login needs to be redone!")
-        }
     }
 
     /**
@@ -98,9 +85,9 @@ class SheetsRepository(
             val permittedScopes = it.groups["scope"]?.value
 
             if (permittedScopes == SCOPE && authCode != null) {
-                sheetsPrefsDS.saveAuthCode(authCode)
+                prefsStorage.saveAuthCode(authCode)
                 // Immediately exchange auth code for access and refresh tokens.
-                updateAccessRefreshTokens(authCode, isRefresh = false)
+                getFirstAccessRefreshTokens(authCode)
                 return authCode
             }
         }
@@ -110,22 +97,19 @@ class SheetsRepository(
 
     suspend fun appendRow(
         range: String = DEFAULT_APPEND_ROW_RANGE,
-        valueRange: ValueRange
+        valueRange: ValueRange,
     ): Result<Unit> {
-        val storedPrefs = sheetsPrefsDS.storedPreferences.first()
-        val accessToken = getAccessToken(storedPrefs)
+        val storedPrefs = prefsStorage.storedPreferences.first()
 
-        return sheetsAPIDataSource.appendRows(
+        return sheetsApi.appendRows(
             spreadsheetID = storedPrefs.spreadsheetId!!,
-            accessToken = accessToken,
             range = range,
             valueRange = valueRange,
         )
     }
 
     suspend fun refreshCategories(): Result<Unit> {
-        val storedPrefs = sheetsPrefsDS.storedPreferences.first()
-        val accessToken = getAccessToken(storedPrefs)
+        val storedPrefs = prefsStorage.storedPreferences.first()
 
         if (storedPrefs.spreadsheetId == null)
             return Result.failure(SheetsException.SpreadsheetIdNullException())
@@ -136,15 +120,14 @@ class SheetsRepository(
         if (storedPrefs.categoriesRange == null)
             return Result.failure(SheetsException.CategoriesRangeNullException())
 
-        val result = sheetsAPIDataSource.getCategories(
+        val result = sheetsApi.getCategories(
             spreadsheetID = storedPrefs.spreadsheetId,
             sheetTitle = storedPrefs.sheetTitle,
-            accessToken = accessToken,
             range = storedPrefs.categoriesRange,
         )
 
         if (result.isSuccess) {
-            sheetsPrefsDS.saveCategories(result.getOrNull()!!)
+            prefsStorage.saveCategories(result.getOrNull()!!)
             return Result.success(Unit)
         }
 
@@ -152,14 +135,13 @@ class SheetsRepository(
     }
 
     suspend fun refreshSheetTitles(): Result<Unit> {
-        val storedPrefs = sheetsPrefsDS.storedPreferences.first()
-        val accessToken = getAccessToken(storedPrefs)
+        val storedPrefs = prefsStorage.storedPreferences.first()
 
         storedPrefs.spreadsheetId?.let {
-            val result = sheetsAPIDataSource.getSheetTitles(storedPrefs.spreadsheetId, accessToken)
+            val result = sheetsApi.getSheetTitles(storedPrefs.spreadsheetId)
 
             if (result.isSuccess) {
-                sheetsPrefsDS.saveSheetTitles(result.getOrNull()!!)
+                prefsStorage.saveSheetTitles(result.getOrNull()!!)
                 return Result.success(Unit)
             }
 
@@ -170,14 +152,14 @@ class SheetsRepository(
     }
 
     suspend fun saveSheetTitle(sheetTitle: String) {
-        sheetsPrefsDS.saveSheetTitle(sheetTitle)
+        prefsStorage.saveSheetTitle(sheetTitle)
     }
 
     suspend fun saveSpreadsheetId(newSpreadsheetId: String) {
-        sheetsPrefsDS.saveSpreadsheetId(newSpreadsheetId)
+        prefsStorage.saveSpreadsheetId(newSpreadsheetId)
     }
 
     suspend fun saveCategoriesRange(newCategoriesRange: String) {
-        sheetsPrefsDS.saveCategoriesRange(newCategoriesRange)
+        prefsStorage.saveCategoriesRange(newCategoriesRange)
     }
 }

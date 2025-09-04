@@ -5,8 +5,9 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
+import com.munity.sheetsautomator.core.data.local.database.SheetsAutomatorDatabase
 import com.munity.sheetsautomator.core.data.local.datastore.SheetsPreferencesDataSource
-import com.munity.sheetsautomator.core.data.remote.SheetsAPIDataSource
+import com.munity.sheetsautomator.core.data.remote.SheetsApi
 import com.munity.sheetsautomator.core.data.repository.SheetsRepository
 
 private const val DATA_STORE_PREFERENCES_NAME = "preferences"
@@ -15,21 +16,23 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(
 )
 
 class SheetsAutomatorApplication : Application() {
-    private lateinit var sheetsPreferencesDataSource: SheetsPreferencesDataSource
-    private lateinit var sheetsAPIDataSource: SheetsAPIDataSource
+    private lateinit var sheetsDatabase: SheetsAutomatorDatabase
+    private lateinit var sheetsPrefsDataSource: SheetsPreferencesDataSource
+    private lateinit var sheetsApi: SheetsApi
     lateinit var sheetsRepository: SheetsRepository
 
     override fun onCreate() {
         super.onCreate()
 
         // Manual dependency injection
-        sheetsPreferencesDataSource = SheetsPreferencesDataSource(dataStore = this.dataStore)
-        sheetsAPIDataSource = SheetsAPIDataSource()
-        sheetsRepository = SheetsRepository(sheetsPreferencesDataSource, sheetsAPIDataSource)
+        sheetsPrefsDataSource = SheetsPreferencesDataSource(dataStore = this.dataStore)
+        sheetsDatabase = SheetsAutomatorDatabase.getDatabase(context = applicationContext)
+        sheetsApi = SheetsApi(sheetsPrefsDataSource)
+        sheetsRepository = SheetsRepository(sheetsPrefsDataSource, sheetsDatabase, sheetsApi)
     }
 
     override fun onTerminate() {
         super.onTerminate()
-        sheetsAPIDataSource.closeClient()
+        sheetsApi.closeClient()
     }
 }

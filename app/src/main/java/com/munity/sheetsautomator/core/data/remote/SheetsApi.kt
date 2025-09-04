@@ -1,41 +1,36 @@
 package com.munity.sheetsautomator.core.data.remote
 
 import com.munity.sheetsautomator.BuildConfig
+import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
 import com.munity.sheetsautomator.core.data.model.gsheet.ErrorInfo
 import com.munity.sheetsautomator.core.data.model.gsheet.Spreadsheet
 import com.munity.sheetsautomator.core.data.model.gsheet.TokenInfo
 import com.munity.sheetsautomator.core.data.model.gsheet.ValueRange
+import com.munity.sheetsautomator.util.DateUtil
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.request.get
-import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.parameters
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.first
 import kotlinx.serialization.json.Json
 import java.net.URLEncoder
 
-class SheetsAPIDataSource {
+class SheetsApi(private val prefsStorage: PreferencesStorage) {
     companion object {
         private const val CLIENT_ID = BuildConfig.CLIENT_ID
-        private const val SCOPE = "https://www.googleapis.com/auth/spreadsheets"
-        private const val GOOGLE_ACCESS_REFRESH_ENDPOINT =
-            "https://accounts.google.com/o/oauth2/token"
-        private const val GOOGLE_SPREADSHEET_ENDPOINT =
-            "https://sheets.googleapis.com/v4/spreadsheets/%s"
-        private const val GOOGLE_SHEETS_VALUES_ENDPOINT =
-            "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s?access_token=%s"
-        private const val GOOGLE_SHEETS_APPEND_ENDPOINT =
-            "https://sheets.googleapis.com/v4/spreadsheets/%s/values/%s:append?valueInputOption=USER_ENTERED&insertDataOption=OVERWRITE"
         private const val PACKAGE_NAME = "com.munity.sheetsautomator"
         private const val TAG = "SheetsDataSource"
     }
@@ -44,19 +39,63 @@ class SheetsAPIDataSource {
         install(ContentNegotiation) {
             json()
         }
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    val storedPrefs = prefsStorage.storedPreferences.first()
+                    val accessToken = storedPrefs.accessToken
+                    val refreshToken = storedPrefs.refreshToken
+                    val expiration = storedPrefs.expirationDate
+
+                    if (expiration != null && DateUtil.isIso8601Expired(expiration))
+                        return@loadTokens null
+
+                    if (accessToken != null)
+                        return@loadTokens BearerTokens(accessToken, refreshToken)
+
+                    return@loadTokens null
+                }
+
+                refreshTokens {
+                    val tokenInfoResult =
+                        getAccessRefreshTokens(this.oldTokens?.refreshToken!!, isRefresh = true)
+
+                    tokenInfoResult.onSuccess { tokenInfo ->
+                        val expirationDate: String =
+                            DateUtil.getIso8601FromNowIn(tokenInfo.expiresIn)
+                        // Save new token
+                        prefsStorage.saveAccessToken(tokenInfo.accessToken, expirationDate)
+                        prefsStorage.saveRefreshToken(tokenInfo.refreshToken!!)
+
+                        return@refreshTokens BearerTokens(
+                            tokenInfo.accessToken,
+                            tokenInfo.refreshToken
+                        )
+                    }
+
+//                    throw IllegalStateException("Login needs to be redone!")
+                    null
+                }
+
+                // return false for urls which don't need an Authorization header
+                // (ex: token or refresh token urls),
+                // otherwise return true to include the Authorization header
+                sendWithoutRequest { request ->
+                    request.url.buildString() != SheetsEndpoint.GOOGLE_ACCESS_REFRESH_ENDPOINT
+                }
+            }
+        }
     }
 
     suspend fun getCategories(
         spreadsheetID: String,
         sheetTitle: String,
-        accessToken: String,
-        range: String
+        range: String,
     ): Result<List<String>> {
         val response = httpClient.get(
-            urlString = GOOGLE_SHEETS_VALUES_ENDPOINT.format(
+            urlString = SheetsEndpoint.GOOGLE_SHEETS_VALUES_ENDPOINT.format(
                 spreadsheetID,
                 URLEncoder.encode("'$sheetTitle'!$range", Charsets.UTF_8.name()),
-                accessToken
             )
         )
 
@@ -67,15 +106,16 @@ class SheetsAPIDataSource {
 
     suspend fun appendRows(
         spreadsheetID: String,
-        accessToken: String,
         range: String,
-        valueRange: ValueRange
+        valueRange: ValueRange,
     ): Result<Unit> {
         val response =
             httpClient.post(
-                urlString = GOOGLE_SHEETS_APPEND_ENDPOINT.format(spreadsheetID, range),
+                urlString = SheetsEndpoint.GOOGLE_SHEETS_APPEND_ENDPOINT.format(
+                    spreadsheetID,
+                    range
+                ),
             ) {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
                 contentType(ContentType.Application.Json)
                 setBody(Json.encodeToString(valueRange))
             }
@@ -85,10 +125,10 @@ class SheetsAPIDataSource {
 
     suspend fun getAccessRefreshTokens(
         authorizationCode: String,
-        isRefresh: Boolean
+        isRefresh: Boolean,
     ): Result<TokenInfo> {
         val response: HttpResponse = httpClient.submitForm(
-            url = GOOGLE_ACCESS_REFRESH_ENDPOINT,
+            url = SheetsEndpoint.GOOGLE_ACCESS_REFRESH_ENDPOINT,
             formParameters = parameters {
                 append("grant_type", if (isRefresh) "refresh_token" else "authorization_code")
                 if (isRefresh) append("refresh_token", authorizationCode)
@@ -97,6 +137,7 @@ class SheetsAPIDataSource {
                 append("redirect_uri", "${PACKAGE_NAME}:")
             }
         ).body()
+
         val responseAsText = response.bodyAsText()
         var errorInfoString: String? = null
 
@@ -110,11 +151,13 @@ class SheetsAPIDataSource {
         }
     }
 
-    suspend fun getSheetTitles(spreadsheetID: String, accessToken: String): Result<List<String>> {
+    suspend fun getSheetTitles(spreadsheetID: String): Result<List<String>> {
         val response =
-            httpClient.get(urlString = GOOGLE_SPREADSHEET_ENDPOINT.format(spreadsheetID)) {
-                header(HttpHeaders.Authorization, "Bearer $accessToken")
-            }
+            httpClient.get(
+                urlString = SheetsEndpoint.GOOGLE_SPREADSHEET_ENDPOINT.format(
+                    spreadsheetID
+                )
+            )
 
         return checkReturnResult(response) { responseToTransform ->
             val spreadsheet: Spreadsheet = responseToTransform.body()

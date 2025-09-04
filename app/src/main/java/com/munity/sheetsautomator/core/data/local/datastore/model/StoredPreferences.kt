@@ -4,7 +4,7 @@ data class StoredPreferences(
     val authToken: String?,
     val accessToken: String?,
     val refreshToken: String?,
-    val expiresIn: String?,
+    val expirationDate: String?,
     val spreadsheetId: String?,
     val sheetTitle: String?,
     val sheetTitles: List<String>?,

@@ -20,7 +20,7 @@ class SheetsPreferencesDataSource(
         val AUTH_CODE_KEY = stringPreferencesKey("auth_code")
         val ACCESS_TOKEN_KEY = stringPreferencesKey("access_token")
         val REFRESH_TOKEN_KEY = stringPreferencesKey("refresh_token")
-        val EXPIRES_IN_KEY = stringPreferencesKey("expires_in")
+        val EXPIRATION_KEY = stringPreferencesKey("expiration_date")
         val CATEGORIES_KEY = stringPreferencesKey("categories")
         val SPREADSHEET_ID_KEY = stringPreferencesKey("spreadsheet_id")
         val SHEET_TITLE_KEY = stringPreferencesKey("sheet_title")
@@ -42,7 +42,7 @@ class SheetsPreferencesDataSource(
             StoredPreferences(
                 authToken = preferences[AUTH_CODE_KEY],
                 accessToken = preferences[ACCESS_TOKEN_KEY],
-                expiresIn = preferences[EXPIRES_IN_KEY],
+                expirationDate = preferences[EXPIRATION_KEY],
                 refreshToken = preferences[REFRESH_TOKEN_KEY],
                 spreadsheetId = preferences[SPREADSHEET_ID_KEY],
                 sheetTitle = preferences[SHEET_TITLE_KEY],
@@ -61,7 +61,7 @@ class SheetsPreferencesDataSource(
     override suspend fun saveAccessToken(accessToken: String, dateExp: String) {
         dataStore.edit { preferences ->
             preferences[ACCESS_TOKEN_KEY] = accessToken
-            preferences[EXPIRES_IN_KEY] = dateExp
+            preferences[EXPIRATION_KEY] = dateExp
         }
     }
 
