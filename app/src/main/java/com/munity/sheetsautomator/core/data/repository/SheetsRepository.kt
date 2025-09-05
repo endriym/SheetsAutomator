@@ -2,9 +2,10 @@ package com.munity.sheetsautomator.core.data.repository
 
 import com.munity.sheetsautomator.core.data.local.database.SheetsAutomatorDatabase
 import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
-import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.core.data.remote.SheetsApi
+import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.util.DateUtil
+import com.munity.sheetsautomator.util.OAuthUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -16,7 +17,6 @@ class SheetsRepository(
 ) {
     companion object {
         private const val TAG = "SheetsRepository"
-        private const val SCOPE = "https://www.googleapis.com/auth/spreadsheets"
         private const val DEFAULT_APPEND_ROW_RANGE = "A1:D1"
     }
 
@@ -84,7 +84,11 @@ class SheetsRepository(
             val authCode = it.groups["code"]?.value
             val permittedScopes = it.groups["scope"]?.value
 
-            if (permittedScopes == SCOPE && authCode != null) {
+            if (
+                permittedScopes!!.contains(OAuthUtil.GOOGLE_DRIVE_SCOPE)
+                && permittedScopes.contains(OAuthUtil.GOOGLE_SHEETS_SCOPE)
+                && authCode != null
+            ) {
                 prefsStorage.saveAuthCode(authCode)
                 // Immediately exchange auth code for access and refresh tokens.
                 getFirstAccessRefreshTokens(authCode)
