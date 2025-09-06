@@ -18,7 +18,7 @@
     <string name="categoria">Categoria</string>
     <string name="aggiungi">Aggiungi</string>
     <string name="accedi_info">Accedi per autorizzare la lettura e la modifica dei fogli Google Sheet</string>
-    <string name="spreadsheet_id">Spreadsheet ID</string>
+    <string name="spreadsheet_id">Spreadsheet</string>
     <string name="sheet_title">Sheet title</string>
     <string name="dismiss">Dismiss</string>
     <string name="confirm">Confirm</string>
