@@ -1,21 +1,23 @@
 package com.munity.sheetsautomator.core.data.remote.model
 
 import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonIgnoreUnknownKeys
+import kotlinx.serialization.json.JsonNames
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-data class Spreadsheet(
+data class SpreadsheetResponse(
     val spreadsheetId: String,
-    val sheets: List<Sheet>,
+    @SerialName("sheets") val sheetResponses: List<SheetResponse>,
 )
 
 @OptIn(ExperimentalSerializationApi::class)
 @Serializable
 @JsonIgnoreUnknownKeys
-data class Sheet(
+data class SheetResponse(
     val properties: SheetProperties,
 ) {
     @Serializable

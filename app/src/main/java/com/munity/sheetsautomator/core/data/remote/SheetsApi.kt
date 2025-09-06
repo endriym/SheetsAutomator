@@ -2,8 +2,10 @@ package com.munity.sheetsautomator.core.data.remote
 
 import com.munity.sheetsautomator.BuildConfig
 import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
+import com.munity.sheetsautomator.core.data.remote.model.DriveFileResponse
+import com.munity.sheetsautomator.core.data.remote.model.DriveGetFilesResponse
 import com.munity.sheetsautomator.core.data.remote.model.ErrorInfo
-import com.munity.sheetsautomator.core.data.remote.model.Spreadsheet
+import com.munity.sheetsautomator.core.data.remote.model.SpreadsheetResponse
 import com.munity.sheetsautomator.core.data.remote.model.TokenInfo
 import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.util.DateUtil
@@ -39,6 +41,7 @@ class SheetsApi(private val prefsStorage: PreferencesStorage) {
         install(ContentNegotiation) {
             json()
         }
+
         install(Auth) {
             bearer {
                 loadTokens {
@@ -48,28 +51,28 @@ class SheetsApi(private val prefsStorage: PreferencesStorage) {
                     val expiration = storedPrefs.expirationDate
 
                     if (expiration != null && DateUtil.isIso8601Expired(expiration))
-                        return@loadTokens null
+                        return@loadTokens BearerTokens(accessToken!!, refreshToken)
 
                     if (accessToken != null)
                         return@loadTokens BearerTokens(accessToken, refreshToken)
 
-                    return@loadTokens null
+                    return@loadTokens BearerTokens("", refreshToken)
                 }
 
                 refreshTokens {
                     val tokenInfoResult =
                         getAccessRefreshTokens(this.oldTokens?.refreshToken!!, isRefresh = true)
 
-                    tokenInfoResult.onSuccess { tokenInfo ->
+                    tokenInfoResult.onSuccess { newTokenInfo ->
                         val expirationDate: String =
-                            DateUtil.getIso8601FromNowIn(tokenInfo.expiresIn)
+                            DateUtil.getIso8601FromNowIn(newTokenInfo.expiresIn)
                         // Save new token
-                        prefsStorage.saveAccessToken(tokenInfo.accessToken, expirationDate)
-                        prefsStorage.saveRefreshToken(tokenInfo.refreshToken!!)
+                        prefsStorage.saveAccessToken(newTokenInfo.accessToken, expirationDate)
+                        prefsStorage.saveRefreshToken(newTokenInfo.refreshToken!!)
 
                         return@refreshTokens BearerTokens(
-                            tokenInfo.accessToken,
-                            tokenInfo.refreshToken
+                            newTokenInfo.accessToken,
+                            newTokenInfo.refreshToken
                         )
                     }
 
@@ -84,6 +87,57 @@ class SheetsApi(private val prefsStorage: PreferencesStorage) {
                     request.url.buildString() != SheetsEndpoint.GOOGLE_ACCESS_REFRESH_ENDPOINT
                 }
             }
+        }
+    }
+
+    suspend fun getAccessRefreshTokens(
+        authorizationCode: String,
+        isRefresh: Boolean,
+    ): Result<TokenInfo> {
+        val response: HttpResponse = httpClient.submitForm(
+            url = SheetsEndpoint.GOOGLE_ACCESS_REFRESH_ENDPOINT,
+            formParameters = parameters {
+                append("grant_type", if (isRefresh) "refresh_token" else "authorization_code")
+                if (isRefresh) append("refresh_token", authorizationCode)
+                if (!isRefresh) append("code", authorizationCode)
+                append("client_id", CLIENT_ID)
+                append("redirect_uri", "${PACKAGE_NAME}:")
+            }
+        ).body()
+
+        val responseAsText = response.bodyAsText()
+        var errorInfoString: String? = null
+
+        if (responseAsText.contains("error")) {
+            val errorInfo: ErrorInfo = Json.decodeFromString(responseAsText)
+            errorInfoString = errorInfo.toString()
+        }
+
+        return checkReturnResult(response, errorInfoString) { responseToTransform ->
+            Json.decodeFromString<TokenInfo>(responseToTransform.bodyAsText())
+        }
+    }
+
+    suspend fun getSpreadsheetFiles(): Result<List<DriveFileResponse>> {
+        val response = httpClient.get(urlString = SheetsEndpoint.GOOGLE_DRIVE_SPREADSHEETS_ENDPOINT)
+
+        return checkReturnResult(response) { responseToTransform ->
+            val driveGetFilesResponse = responseToTransform.body<DriveGetFilesResponse>()
+            driveGetFilesResponse.files
+        }
+    }
+
+    suspend fun getSheetTitles(spreadsheetID: String): Result<List<String>> {
+        val response =
+            httpClient.get(
+                urlString = SheetsEndpoint.GOOGLE_SPREADSHEET_ENDPOINT.format(
+                    spreadsheetID
+                )
+            )
+
+        return checkReturnResult(response) { responseToTransform ->
+            val spreadsheetResponse: SpreadsheetResponse = responseToTransform.body()
+            spreadsheetResponse.sheetResponses.map { it.properties.title }
         }
     }
 
@@ -121,48 +175,6 @@ class SheetsApi(private val prefsStorage: PreferencesStorage) {
             }
 
         return checkReturnResult(response) {}
-    }
-
-    suspend fun getAccessRefreshTokens(
-        authorizationCode: String,
-        isRefresh: Boolean,
-    ): Result<TokenInfo> {
-        val response: HttpResponse = httpClient.submitForm(
-            url = SheetsEndpoint.GOOGLE_ACCESS_REFRESH_ENDPOINT,
-            formParameters = parameters {
-                append("grant_type", if (isRefresh) "refresh_token" else "authorization_code")
-                if (isRefresh) append("refresh_token", authorizationCode)
-                if (!isRefresh) append("code", authorizationCode)
-                append("client_id", CLIENT_ID)
-                append("redirect_uri", "${PACKAGE_NAME}:")
-            }
-        ).body()
-
-        val responseAsText = response.bodyAsText()
-        var errorInfoString: String? = null
-
-        if (responseAsText.contains("error")) {
-            val errorInfo: ErrorInfo = Json.decodeFromString(responseAsText)
-            errorInfoString = errorInfo.toString()
-        }
-
-        return checkReturnResult(response, errorInfoString) { responseToTransform ->
-            Json.decodeFromString<TokenInfo>(responseToTransform.bodyAsText())
-        }
-    }
-
-    suspend fun getSheetTitles(spreadsheetID: String): Result<List<String>> {
-        val response =
-            httpClient.get(
-                urlString = SheetsEndpoint.GOOGLE_SPREADSHEET_ENDPOINT.format(
-                    spreadsheetID
-                )
-            )
-
-        return checkReturnResult(response) { responseToTransform ->
-            val spreadsheet: Spreadsheet = responseToTransform.body()
-            spreadsheet.sheets.map { it.properties.title }
-        }
     }
 
     fun closeClient() {
