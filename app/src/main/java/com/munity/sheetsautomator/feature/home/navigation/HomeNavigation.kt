@@ -1,6 +1,7 @@
 package com.munity.sheetsautomator.feature.home.navigation
 
 import android.content.Context
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -21,32 +22,36 @@ fun NavController.navigateToHome(navOptions: NavOptions? = null) =
 
 fun NavGraphBuilder.homeScreen(
     context: Context,
-    onShowSnackbar: suspend (String) -> Boolean,
+    showSnackbar: suspend (String) -> Boolean,
     modifier: Modifier = Modifier,
 ) {
     composable<HomeRoute> { navBackStackEntry ->
-        val homeViewModel: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
+        val homeVM: HomeViewModel = viewModel(factory = HomeViewModel.Factory)
 
-        val uiState by homeViewModel.uiState.collectAsState()
-        val isLoggedIn by homeViewModel.isLoggedIn.collectAsState()
-        val categories: List<String> by homeViewModel.categories.collectAsState()
+        val uiState by homeVM.uiState.collectAsState()
+        val isLoggedIn by homeVM.isLoggedIn.collectAsState()
+        val categories: List<String> by homeVM.categories.collectAsState()
+
+        LaunchedEffect(key1 = true) {
+            homeVM.snackbarMessages.collect { message ->
+                message?.let {
+                    showSnackbar(it)
+                }
+            }
+        }
 
         HomeScreen(
             isLoggedIn = isLoggedIn,
-            amount = uiState.amount,
-            onAmountChange = homeViewModel::onAmountChange,
-            onDateChange = homeViewModel::onDateChange,
-            category = uiState.category,
-            onDropDownMenuItemClick = homeViewModel::onDropDownMenuItemClick,
+            amount = uiState.dataEntry.amount,
+            onAmountChange = homeVM::onAmountChange,
+            onDateChange = homeVM::onDateChange,
+            category = uiState.dataEntry.category,
+            onDropDownMenuItemClick = homeVM::onDropDownMenuItemClick,
             dropDownItems = categories,
-            description = uiState.description,
-            onDescriptionChange = homeViewModel::onDescriptionChange,
-            onSignInButtonClick = { homeViewModel.onSignInButtonClick(context) },
-            onAddButtonClick = homeViewModel::onAddButtonClick,
-            isSnackBarShowing = uiState.isSnackBarShowing,
-            snackBarMessage = uiState.snackBarMessage,
-            onShowSnackbar = onShowSnackbar,
-            onDismissSnackBar = homeViewModel::onDismissSnackBar,
+            description = uiState.dataEntry.description,
+            onDescriptionChange = homeVM::onDescriptionChange,
+            onSignInButtonClick = { homeVM.onSignInButtonClick(context) },
+            onAddButtonClick = homeVM::onAddButtonClick,
             modifier = modifier,
         )
     }

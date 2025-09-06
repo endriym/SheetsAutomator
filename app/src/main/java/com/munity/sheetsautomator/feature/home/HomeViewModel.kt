@@ -8,10 +8,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.munity.sheetsautomator.SheetsAutomatorApplication
-import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.core.data.repository.SheetsRepository
 import com.munity.sheetsautomator.util.OAuthUtil
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +32,8 @@ class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel(
     private val _uiState: MutableStateFlow<HomeUIState> = MutableStateFlow(HomeUIState())
     val uiState: StateFlow<HomeUIState> = _uiState.asStateFlow()
 
+    val snackbarMessages: SharedFlow<String?> = sheetsRepository.messages
+
     val isLoggedIn: StateFlow<Boolean> = sheetsRepository.isLoggedIn.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -46,65 +48,45 @@ class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel(
 
     fun onAmountChange(newAmount: String) {
         _uiState.update { oldState ->
-            oldState.copy(amount = newAmount)
+            oldState.copy(dataEntry = oldState.dataEntry.copy(amount = newAmount))
         }
     }
 
     fun onDateChange(newDate: String) {
         _uiState.update { oldState ->
-            oldState.copy(date = newDate)
+            oldState.copy(dataEntry = oldState.dataEntry.copy(date = newDate))
         }
     }
 
     fun onDescriptionChange(newDescription: String) {
         _uiState.update { oldState ->
-            oldState.copy(description = newDescription)
+            oldState.copy(dataEntry = oldState.dataEntry.copy(description = newDescription))
         }
     }
 
     fun onDropDownMenuItemClick(categoryClicked: String) {
         _uiState.update { oldState ->
-            oldState.copy(category = categoryClicked)
+            oldState.copy(dataEntry = oldState.dataEntry.copy(category = categoryClicked))
         }
     }
 
     fun onAddButtonClick() {
         viewModelScope.launch {
-            val valueRange = ValueRange(
-                values = listOf(uiStateToStringList())
-            )
-            val result = sheetsRepository.appendRow(range = "A:D", valueRange = valueRange)
+            val result =
+                sheetsRepository.appendRow(range = "A:D", dataEntry = _uiState.value.dataEntry)
 
-            _uiState.update { newUiState ->
-                if (result.isSuccess) {
-                    newUiState.copy(
-                        isSnackBarShowing = true,
-                        snackBarMessage = "Row was added successfully."
-                    )
-                } else {
-                    newUiState.copy(
-                        isSnackBarShowing = true,
-                        snackBarMessage = result.exceptionOrNull()?.message
-                            ?: "Row was not added. Unknown problem!"
-                    )
-                }
+            val message = if (result.isSuccess) {
+                "Row was added successfully."
+            } else {
+                result.exceptionOrNull()?.message
+                    ?: "Row was not added. Unknown problem!"
             }
-        }
-    }
 
-    fun onDismissSnackBar() {
-        _uiState.update { newUiState ->
-            newUiState.copy(isSnackBarShowing = false, snackBarMessage = "")
+            sheetsRepository.emitMessage(message)
         }
     }
 
     fun onSignInButtonClick(context: Context) {
         OAuthUtil.launchAuthentication(context)
-    }
-
-    private fun uiStateToStringList(): List<String> {
-        return uiState.value.run {
-            listOf(amount, date, category, description)
-        }
     }
 }

@@ -1,12 +1,13 @@
 package com.munity.sheetsautomator.feature.home
 
+import com.munity.sheetsautomator.core.data.model.DataEntry
 import com.munity.sheetsautomator.util.DateUtil
 
 data class HomeUIState(
-    val amount: String = "",
-    val date: String = DateUtil.getCurrentDayMonth(),
-    val category: String = "",
-    val description: String = "",
-    val isSnackBarShowing: Boolean = false,
-    val snackBarMessage: String = "",
+    val dataEntry: DataEntry = DataEntry(
+        amount = "",
+        date = DateUtil.getCurrentDayMonth(),
+        category = "",
+        description = "",
+    ),
 )

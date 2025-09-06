@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -35,22 +36,8 @@ fun HomeScreen(
     onDescriptionChange: (String) -> Unit,
     onAddButtonClick: () -> Unit,
     onSignInButtonClick: () -> Unit,
-    isSnackBarShowing: Boolean,
-    snackBarMessage: String,
-    onShowSnackbar: suspend (String) -> Boolean,
-    onDismissSnackBar: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    LaunchedEffect(isSnackBarShowing) {
-        if (isSnackBarShowing) {
-            val snackBarResult = onShowSnackbar(snackBarMessage)
-            // On SnackBar dismissed (either by timeout or by user).
-            if (snackBarResult) {
-                onDismissSnackBar()
-            }
-        }
-    }
-
     if (isLoggedIn) {
         HomeScreenLoggedIn(
             amount = amount,
@@ -83,7 +70,7 @@ fun HomeScreenLoggedIn(
     modifier: Modifier = Modifier,
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-        TextField(
+        OutlinedTextField(
             value = amount,
             onValueChange = onAmountChange,
             label = {
@@ -115,7 +102,7 @@ fun HomeScreenLoggedIn(
                 .padding(16.dp)
         )
 
-        TextField(
+        OutlinedTextField(
             value = description,
             onValueChange = onDescriptionChange,
             label = {
