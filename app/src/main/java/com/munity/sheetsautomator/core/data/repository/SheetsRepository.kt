@@ -2,11 +2,15 @@ package com.munity.sheetsautomator.core.data.repository
 
 import com.munity.sheetsautomator.core.data.local.database.SheetsAutomatorDatabase
 import com.munity.sheetsautomator.core.data.local.datastore.PreferencesStorage
+import com.munity.sheetsautomator.core.data.model.DataEntry
+import com.munity.sheetsautomator.core.data.model.Spreadsheet
 import com.munity.sheetsautomator.core.data.remote.SheetsApi
-import com.munity.sheetsautomator.core.data.remote.model.ValueRange
 import com.munity.sheetsautomator.util.DateUtil
 import com.munity.sheetsautomator.util.OAuthUtil
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -16,7 +20,6 @@ class SheetsRepository(
     private val sheetsApi: SheetsApi,
 ) {
     companion object {
-        private const val TAG = "SheetsRepository"
         private const val DEFAULT_APPEND_ROW_RANGE = "A1:D1"
     }
 
@@ -28,12 +31,16 @@ class SheetsRepository(
         storedPrefs.categories ?: emptyList()
     }
 
-    val spreadsheetId: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
-        storedPrefs.spreadsheetId ?: ""
-    }
+    val selectedSpreadsheet: Flow<Spreadsheet?> =
+        prefsStorage.storedPreferences.map { storedPrefs ->
+            if (storedPrefs.spreadsheetId != null && storedPrefs.spreadsheetName != null)
+                Spreadsheet(id = storedPrefs.spreadsheetId, name = storedPrefs.spreadsheetName)
+            else
+                null
+        }
 
-    val sheetTitle: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
-        storedPrefs.sheetTitle ?: ""
+    val sheetTitle: Flow<String?> = prefsStorage.storedPreferences.map { storedPrefs ->
+        storedPrefs.sheetTitle
     }
 
     val sheetTitles: Flow<List<String>> = prefsStorage.storedPreferences.map { storedPrefs ->
@@ -43,6 +50,11 @@ class SheetsRepository(
     val categoriesRange: Flow<String> = prefsStorage.storedPreferences.map { storedPrefs ->
         storedPrefs.categoriesRange ?: ""
     }
+
+    private val _messages = MutableSharedFlow<String?>()
+    val messages: SharedFlow<String?> = _messages.asSharedFlow()
+
+    suspend fun emitMessage(message: String?) = _messages.emit(message)
 
     /**
      * Exchange authorization code for the first refresh and access tokens.
@@ -101,9 +113,10 @@ class SheetsRepository(
 
     suspend fun appendRow(
         range: String = DEFAULT_APPEND_ROW_RANGE,
-        valueRange: ValueRange,
+        dataEntry: DataEntry,
     ): Result<Unit> {
         val storedPrefs = prefsStorage.storedPreferences.first()
+        val valueRange = dataEntry.asValueRange()
 
         return sheetsApi.appendRows(
             spreadsheetID = storedPrefs.spreadsheetId!!,
@@ -138,14 +151,17 @@ class SheetsRepository(
         return Result.failure(result.exceptionOrNull()!!)
     }
 
-    suspend fun refreshSheetTitles(): Result<Unit> {
-        val storedPrefs = prefsStorage.storedPreferences.first()
+    suspend fun getSpreadsheetFiles(): Result<List<Spreadsheet>> =
+        sheetsApi.getSpreadsheetFiles().map { result -> result.map { it.asExternalModel() } }
 
-        storedPrefs.spreadsheetId?.let {
-            val result = sheetsApi.getSheetTitles(storedPrefs.spreadsheetId)
+    suspend fun getSheetTitles(): Result<Unit> {
+        val selectedSpreadsheet = selectedSpreadsheet.first()
 
-            if (result.isSuccess) {
-                prefsStorage.saveSheetTitles(result.getOrNull()!!)
+        selectedSpreadsheet?.id?.let { spreadsheetId ->
+            val result = sheetsApi.getSheetTitles(spreadsheetId)
+
+            result.onSuccess { sheetTitles ->
+                prefsStorage.saveSheetTitles(sheetTitles)
                 return Result.success(Unit)
             }
 
@@ -159,8 +175,8 @@ class SheetsRepository(
         prefsStorage.saveSheetTitle(sheetTitle)
     }
 
-    suspend fun saveSpreadsheetId(newSpreadsheetId: String) {
-        prefsStorage.saveSpreadsheetId(newSpreadsheetId)
+    suspend fun saveSpreadsheet(newSpreadsheet: Spreadsheet) {
+        prefsStorage.saveSpreadsheet(newSpreadsheet.id, newSpreadsheet.name)
     }
 
     suspend fun saveCategoriesRange(newCategoriesRange: String) {
