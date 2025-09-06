@@ -6,6 +6,7 @@ data class StoredPreferences(
     val refreshToken: String?,
     val expirationDate: String?,
     val spreadsheetId: String?,
+    val spreadsheetName: String?,
     val sheetTitle: String?,
     val sheetTitles: List<String>?,
     val categories: List<String>?,

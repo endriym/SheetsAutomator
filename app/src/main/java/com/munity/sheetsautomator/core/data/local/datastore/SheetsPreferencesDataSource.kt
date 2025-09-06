@@ -23,6 +23,7 @@ class SheetsPreferencesDataSource(
         val EXPIRATION_KEY = stringPreferencesKey("expiration_date")
         val CATEGORIES_KEY = stringPreferencesKey("categories")
         val SPREADSHEET_ID_KEY = stringPreferencesKey("spreadsheet_id")
+        val SPREADSHEET_NAME_KEY = stringPreferencesKey("spreadsheet_name")
         val SHEET_TITLE_KEY = stringPreferencesKey("sheet_title")
         val SHEET_TITLES_KEY = stringPreferencesKey("sheet_titles")
         val CATEGORIES_RANGE_KEY = stringPreferencesKey("categories_range")
@@ -45,6 +46,7 @@ class SheetsPreferencesDataSource(
                 expirationDate = preferences[EXPIRATION_KEY],
                 refreshToken = preferences[REFRESH_TOKEN_KEY],
                 spreadsheetId = preferences[SPREADSHEET_ID_KEY],
+                spreadsheetName = preferences[SPREADSHEET_NAME_KEY],
                 sheetTitle = preferences[SHEET_TITLE_KEY],
                 sheetTitles = preferences[SHEET_TITLES_KEY]?.split(", "),
                 categories = preferences[CATEGORIES_KEY]?.split(", "),
@@ -77,9 +79,10 @@ class SheetsPreferencesDataSource(
         }
     }
 
-    override suspend fun saveSpreadsheetId(spreadsheetId: String) {
+    override suspend fun saveSpreadsheet(spreadsheetId: String, spreadsheetName: String) {
         dataStore.edit { preferences ->
             preferences[SPREADSHEET_ID_KEY] = spreadsheetId
+            preferences[SPREADSHEET_NAME_KEY] = spreadsheetName
         }
     }
 

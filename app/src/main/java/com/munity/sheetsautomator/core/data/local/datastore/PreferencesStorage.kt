@@ -10,7 +10,7 @@ interface PreferencesStorage {
     suspend fun saveAccessToken(accessToken: String, dateExp: String)
     suspend fun saveRefreshToken(refreshToken: String)
     suspend fun saveCategories(categories: List<String>)
-    suspend fun saveSpreadsheetId(spreadsheetId: String)
+    suspend fun saveSpreadsheet(spreadsheetId: String, spreadsheetName: String)
     suspend fun saveSheetTitle(sheetTitle: String)
     suspend fun saveSheetTitles(sheetTitles: List<String>)
     suspend fun saveCategoriesRange(categoriesRange: String)
