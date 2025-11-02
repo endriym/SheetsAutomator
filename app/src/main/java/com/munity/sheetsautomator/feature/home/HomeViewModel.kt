@@ -8,6 +8,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.munity.sheetsautomator.SheetsAutomatorApplication
+import com.munity.sheetsautomator.core.data.model.DataEntry
 import com.munity.sheetsautomator.core.data.repository.SheetsRepository
 import com.munity.sheetsautomator.util.OAuthUtil
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -48,32 +49,60 @@ class HomeViewModel(private val sheetsRepository: SheetsRepository) : ViewModel(
 
     fun onAmountChange(newAmount: String) {
         _uiState.update { oldState ->
-            oldState.copy(dataEntry = oldState.dataEntry.copy(amount = newAmount))
+            oldState.copy(amount = newAmount)
         }
     }
 
     fun onDateChange(newDate: String) {
         _uiState.update { oldState ->
-            oldState.copy(dataEntry = oldState.dataEntry.copy(date = newDate))
+            oldState.copy(date = newDate)
         }
     }
 
     fun onDescriptionChange(newDescription: String) {
         _uiState.update { oldState ->
-            oldState.copy(dataEntry = oldState.dataEntry.copy(description = newDescription))
+            oldState.copy(description = newDescription)
         }
     }
 
     fun onDropDownMenuItemClick(categoryClicked: String) {
         _uiState.update { oldState ->
-            oldState.copy(dataEntry = oldState.dataEntry.copy(category = categoryClicked))
+            oldState.copy(category = categoryClicked)
         }
     }
 
     fun onAddButtonClick() {
         viewModelScope.launch {
-            val result =
-                sheetsRepository.appendRow(range = "A:D", dataEntry = _uiState.value.dataEntry)
+            val result = with(_uiState.value) {
+                val message = if (amount.isNullOrBlank())
+                    "Please enter a valid 'amount'"
+                else if (date.isNullOrBlank())
+                    "Please enter a valid 'date'"
+                else if (category.isNullOrBlank())
+                    "Please select a 'category'"
+                else if (description.isNullOrBlank())
+                    "Please enter a non blank description"
+                else
+                    null
+
+                message?.let {
+                    viewModelScope.launch {
+                        sheetsRepository.emitMessage(message)
+                    }
+
+                    return@launch
+                }
+
+                sheetsRepository.appendRow(
+                    range = "A:D",
+                    dataEntry = DataEntry(
+                        amount = amount!!,
+                        date = date!!,
+                        category = category!!,
+                        description = description!!
+                    )
+                )
+            }
 
             val message = if (result.isSuccess) {
                 "Row was added successfully."

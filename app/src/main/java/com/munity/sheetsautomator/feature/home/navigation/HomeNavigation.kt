@@ -42,13 +42,14 @@ fun NavGraphBuilder.homeScreen(
 
         HomeScreen(
             isLoggedIn = isLoggedIn,
-            amount = uiState.dataEntry.amount,
+            amount = uiState.amount ?: "",
             onAmountChange = homeVM::onAmountChange,
+            selectedDate = uiState.date ?: "",
             onDateChange = homeVM::onDateChange,
-            category = uiState.dataEntry.category,
+            category = uiState.category ?: "",
             onDropDownMenuItemClick = homeVM::onDropDownMenuItemClick,
             dropDownItems = categories,
-            description = uiState.dataEntry.description,
+            description = uiState.description ?: "",
             onDescriptionChange = homeVM::onDescriptionChange,
             onSignInButtonClick = { homeVM.onSignInButtonClick(context) },
             onAddButtonClick = homeVM::onAddButtonClick,

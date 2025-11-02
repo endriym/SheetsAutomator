@@ -26,6 +26,7 @@ fun HomeScreen(
     isLoggedIn: Boolean,
     amount: String,
     onAmountChange: (String) -> Unit,
+    selectedDate: String,
     onDateChange: (String) -> Unit,
     category: String,
     onDropDownMenuItemClick: (String) -> Unit,
@@ -34,12 +35,13 @@ fun HomeScreen(
     onDescriptionChange: (String) -> Unit,
     onAddButtonClick: () -> Unit,
     onSignInButtonClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     if (isLoggedIn) {
         HomeScreenLoggedIn(
             amount = amount,
             onAmountChange = onAmountChange,
+            selectedDate = selectedDate,
             onDateChange = onDateChange,
             category = category,
             onDropDownMenuItemClick = onDropDownMenuItemClick,
@@ -58,6 +60,7 @@ fun HomeScreen(
 fun HomeScreenLoggedIn(
     amount: String,
     onAmountChange: (String) -> Unit,
+    selectedDate: String,
     onDateChange: (String) -> Unit,
     category: String,
     onDropDownMenuItemClick: (String) -> Unit,
@@ -84,6 +87,7 @@ fun HomeScreenLoggedIn(
         )
 
         DatePickerDocked(
+            selectedDate = selectedDate,
             onDateChange = onDateChange,
             modifier = Modifier
                 .fillMaxWidth()

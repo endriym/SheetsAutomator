@@ -1,5 +1,6 @@
 package com.munity.sheetsautomator.core.ui.components
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,18 +30,30 @@ import androidx.compose.ui.window.Popup
 import com.munity.sheetsautomator.R
 import com.munity.sheetsautomator.util.DateUtil.convertMillisToDate
 
+private const val TAG = "DatePickerDocked"
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DatePickerDocked(onDateChange: (String) -> Unit, modifier: Modifier = Modifier) {
+fun DatePickerDocked(
+    selectedDate: String,
+    onDateChange: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState()
-    val selectedDate = datePickerState.selectedDateMillis?.let { millis ->
-        // Treating this as a trigger event when a date is selected in the picker
-        val date = convertMillisToDate(millis)
-        onDateChange(date)
-        showDatePicker = false
-        date
-    } ?: ""
+
+    LaunchedEffect(datePickerState.selectedDateMillis) {
+        datePickerState.selectedDateMillis?.let { millis ->
+            // Treating this as a trigger event when a date is selected in the picker
+            Log.d(
+                TAG,
+                "DatePickerDocked: onDismissRequest called"
+            )
+            val dateStr = convertMillisToDate(millis)
+            onDateChange(dateStr)
+            showDatePicker = false
+        }
+    }
 
     Column(
         modifier = modifier
