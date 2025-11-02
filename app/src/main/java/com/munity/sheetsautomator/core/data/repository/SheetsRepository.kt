@@ -120,7 +120,7 @@ class SheetsRepository(
 
         return sheetsApi.appendRows(
             spreadsheetID = storedPrefs.spreadsheetId!!,
-            range = range,
+            range = "${storedPrefs.sheetTitle}!$range",
             valueRange = valueRange,
         )
     }
