@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">SheetsAutomator</string>
+    <string name="app_name" translatable="false">SheetsAutomator</string>
     <string name="sign_in_with_google">Sign in with Google</string>
 
     <!-- NavigationBar  -->
@@ -11,13 +11,13 @@
     <string name="settings_title_text">Settings</string>
     <!-- **************** -->
 
-    <string name="importo">Importo</string>
-    <string name="data">Data</string>
-    <string name="descrizione">Descrizione</string>
-    <string name="login">Accedi</string>
-    <string name="categoria">Categoria</string>
-    <string name="aggiungi">Aggiungi</string>
-    <string name="accedi_info">Accedi per autorizzare la lettura e la modifica dei fogli Google Sheet</string>
+    <string name="amount">Amount</string>
+    <string name="date">Date</string>
+    <string name="description">Description</string>
+    <string name="login">Login</string>
+    <string name="category">Category</string>
+    <string name="insert">Insert</string>
+    <string name="login_info">Log in to authorize read and write access to your Google Spreadsheets</string>
     <string name="spreadsheet_id">Spreadsheet</string>
     <string name="sheet_title">Sheet title</string>
     <string name="dismiss">Dismiss</string>

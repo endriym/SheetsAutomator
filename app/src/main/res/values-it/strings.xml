@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SheetsAutomator</string>
+    <string name="settings_title_text">Impostazioni</string>
+    <string name="amount">Importo</string>
+    <string name="date">Data</string>
+    <string name="description">Descrizione</string>
+    <string name="login">Accedi</string>
+    <string name="category">Categoria</string>
+    <string name="insert">Aggiungi</string>
+    <string name="login_info">Accedi per autorizzare la lettura e la modifica dei fogli Google Sheet</string>
+    <string name="sign_in_with_google">Accedi con Google</string>
+    <string name="home_icon_text">Home</string>
+    <string name="home_title_text">Home</string>
+    <string name="queue_icon_text">Coda</string>
+    <string name="queue_title_text">Coda</string>
+    <string name="settings_icon_text">Impostazioni</string>
+    <string name="spreadsheet_id">Foglio di calcolo</string>
+    <string name="sheet_title">Nome foglio</string>
+    <string name="dismiss">Annulla</string>
+    <string name="confirm">Conferma</string>
+    <string name="dialog_title">Modifica ID del foglio di calcolo</string>
+    <string name="categories">Categorie</string>
+    <string name="categories_range">Intervallo delle categorie</string>
+    <string name="modify_categories_range">Modifica intervallo delle categorie</string>
+</resources>

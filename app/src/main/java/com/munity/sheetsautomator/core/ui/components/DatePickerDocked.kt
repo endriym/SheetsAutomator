@@ -47,7 +47,7 @@ fun DatePickerDocked(onDateChange: (String) -> Unit, modifier: Modifier = Modifi
         OutlinedTextField(
             value = selectedDate,
             onValueChange = onDateChange,
-            label = { Text(stringResource(R.string.data)) },
+            label = { Text(stringResource(R.string.date)) },
             placeholder = { Text(text = "dd/mm/yyyy") },
             trailingIcon = {
                 IconButton(onClick = { showDatePicker = !showDatePicker }) {

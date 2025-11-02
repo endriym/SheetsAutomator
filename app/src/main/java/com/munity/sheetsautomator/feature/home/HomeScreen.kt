@@ -10,9 +10,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -74,7 +72,7 @@ fun HomeScreenLoggedIn(
             value = amount,
             onValueChange = onAmountChange,
             label = {
-                Text(text = stringResource(R.string.importo))
+                Text(text = stringResource(R.string.amount))
             },
             prefix = {
                 Text(text = "€")
@@ -94,7 +92,7 @@ fun HomeScreenLoggedIn(
 
         ExposedDropdownMenu(
             textFieldValue = category,
-            textFieldLabel = stringResource(R.string.categoria),
+            textFieldLabel = stringResource(R.string.category),
             onDropDownMenuItemClick = onDropDownMenuItemClick,
             dropDownItems = dropDownItems,
             modifier = Modifier
@@ -106,7 +104,7 @@ fun HomeScreenLoggedIn(
             value = description,
             onValueChange = onDescriptionChange,
             label = {
-                Text(text = stringResource(R.string.descrizione))
+                Text(text = stringResource(R.string.description))
             },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
             modifier = Modifier
@@ -118,7 +116,7 @@ fun HomeScreenLoggedIn(
             onClick = onAddButtonClick,
             modifier = Modifier.padding(top = 24.dp)
         ) {
-            Text(stringResource(R.string.aggiungi))
+            Text(stringResource(R.string.insert))
         }
     }
 }
@@ -131,7 +129,7 @@ fun HomeScreenNotLoggedIn(onSignInButtonClick: () -> Unit, modifier: Modifier = 
         modifier = modifier
     ) {
         Text(
-            text = stringResource(R.string.accedi_info),
+            text = stringResource(R.string.login_info),
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(16.dp)
         )
